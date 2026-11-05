@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}匿名課程問卷{% endblock %}
+{% block content %}
+<section class="panel narrow">
+  <p class="eyebrow">ANONYMOUS FEEDBACK</p><h1>匿名課程回饋問卷</h1>
+  <p class="muted">本問卷不記錄帳號、姓名或學號。請勿在文字內容中填寫可辨識個人身分的資訊。</p>
+  <form method="post">
+    <label>整體課程滿意度（1 至 5 分）</label>
+    <select name="rating" required><option value="">請選擇</option>{% for n in range(1,6) %}<option value="{{ n }}">{{ n }} 分</option>{% endfor %}</select>
+    <label>你覺得較困難的課程內容</label>
+    <textarea name="difficult" rows="3" placeholder="請描述課程中較難理解的部分"></textarea>
+    <label>對課程或教學方式的建議</label>
+    <textarea name="suggestion" rows="4" placeholder="歡迎提出具體建議"></textarea>
+    <button class="primary full" type="submit">匿名送出</button>
+  </form>
+</section>
+{% endblock %}

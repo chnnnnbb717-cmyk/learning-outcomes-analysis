@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}教師管理首頁{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">TEACHER DASHBOARD</p><h1>教師管理首頁</h1><p class="muted">掌握班級學習狀況，檢視課程目標達成情形。</p></div></div>
+<div class="stats">
+  <div class="stat"><span>學生人數</span><strong>{{ students|length }}</strong></div>
+  <div class="stat"><span>測驗數量</span><strong>{{ quizzes|length }}</strong></div>
+  <div class="stat"><span>問卷平均滿意度</span><strong>{{ avg_rating if avg_rating else '—' }}<small>/ 5</small></strong></div>
+</div>
+<section class="panel">
+  <h2>學生名單</h2>
+  <div class="table-wrap"><table><tr><th>學生姓名</th><th>班級</th></tr>
+  {% for s in students %}<tr><td>{{ s.display_name }}</td><td>{{ s.class_name }}</td></tr>{% endfor %}
+  </table></div>
+</section>
+<section class="panel">
+  <h2>作業成績與完成情形</h2>
+  <div class="table-wrap"><table><tr><th>作業名稱</th><th>學生</th><th>成績</th><th>完成</th></tr>
+  {% for a in assignments %}<tr><td>{{ a.title }}</td><td>{{ a.display_name }}</td><td>{{ a.score }}</td><td>{{ '已完成' if a.completed else '未完成' }}</td></tr>{% endfor %}
+  </table></div>
+</section>
+<section class="panel">
+  <h2>測驗分析</h2>
+  {% for q in quizzes %}
+  <div class="quiz-row"><b>{{ q.title }}</b><span>全班平均答對率：{{ q.avg_rate if q.avg_rate is not none else 0 }}%</span></div>
+  {% endfor %}
+  <div class="chart-box"><canvas id="questionChart"></canvas></div>
+  <script>
+  const labels = {{ question_stats|map(attribute='question_no')|list|tojson }};
+  const rates = {{ question_stats|map(attribute='rate')|list|tojson }};
+  new Chart(document.getElementById('questionChart'), {
+    type:'bar', data:{labels:labels.map(x=>'第 '+x+' 題'),datasets:[{label:'各題答對率 (%)',data:rates,borderWidth:1}]},
+    options:{responsive:true,scales:{y:{beginAtZero:true,max:100}}}
+  });
+  </script>
+</section>
+<section class="panel">
+  <h2>匿名課程問卷分析</h2>
+  <p>問卷回覆數：<b>{{ feedback|length }}</b>　平均滿意度：<b>{{ avg_rating if avg_rating else '尚無資料' }}</b></p>
+  {% if feedback %}
+    {% for f in feedback %}
+    <div class="feedback-item">
+      <b>滿意度：{{ f.rating }} / 5</b>
+      <p>較困難的內容：{{ f.difficult or '未填寫' }}</p>
+      <p>建議：{{ f.suggestion or '未填寫' }}</p>
+    </div>
+    {% endfor %}
+  {% else %}<p class="muted">目前尚無問卷回覆。</p>{% endif %}
+  <p class="privacy-note">問卷資料未儲存學生帳號或姓名；請避免在文字回覆中填寫可辨識個人身分的資訊。</p>
+</section>
+{% endblock %}

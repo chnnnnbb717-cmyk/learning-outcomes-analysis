@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}學生學習首頁{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">STUDENT DASHBOARD</p><h1>我的學習成果</h1><p class="muted">查看個人成績、測驗表現與班級整體學習狀況。</p></div><a class="primary button-link" href="{{ url_for('submit_feedback') }}">填寫匿名問卷</a></div>
+<section class="panel">
+  <h2>我的作業成績</h2>
+  <div class="table-wrap"><table><tr><th>作業名稱</th><th>成績</th><th>完成狀態</th></tr>
+  {% for a in assignments %}<tr><td>{{ a.title }}</td><td>{{ a.score }}</td><td>{{ '已完成' if a.completed else '未完成' }}</td></tr>{% else %}<tr><td colspan="3">尚無作業資料</td></tr>{% endfor %}
+  </table></div>
+</section>
+<section class="panel">
+  <h2>我的測驗結果</h2>
+  <div class="table-wrap"><table><tr><th>測驗</th><th>答對題數</th><th>總題數</th><th>個人答對率</th></tr>
+  {% for r in results %}<tr><td>{{ r.title }}</td><td>{{ r.correct_count }}</td><td>{{ r.question_count }}</td><td>{{ r.rate }}%</td></tr>{% else %}<tr><td colspan="4">尚無測驗資料</td></tr>{% endfor %}
+  </table></div>
+</section>
+<section class="panel">
+  <h2>班級整體測驗表現</h2>
+  <p class="muted">僅顯示班級統計，不會顯示其他同學的個人成績或作答紀錄。</p>
+  {% for s in class_stats %}<div class="quiz-row"><b>{{ s.title }}</b><span>全班平均答對率：{{ s.avg_rate }}%</span></div>{% endfor %}
+  <div class="chart-box"><canvas id="classQuestionChart"></canvas></div>
+  <script>
+  const labels = {{ question_stats|map(attribute='question_no')|list|tojson }};
+  const rates = {{ question_stats|map(attribute='rate')|list|tojson }};
+  new Chart(document.getElementById('classQuestionChart'), {
+    type:'bar', data:{labels:labels.map(x=>'第 '+x+' 題'),datasets:[{label:'班級各題答對率 (%)',data:rates,borderWidth:1}]},
+    options:{responsive:true,scales:{y:{beginAtZero:true,max:100}}}
+  });
+  </script>
+</section>
+{% endblock %}
